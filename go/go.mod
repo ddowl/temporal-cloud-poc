@@ -1,4 +1,4 @@
-module cloud-poc-go/app
+module cloud-poc/app
 
 go 1.20
 

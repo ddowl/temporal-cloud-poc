@@ -1,7 +1,7 @@
 package main
 
 import (
-	"cloud-poc-go/app"
+	"cloud-poc/app"
 	"context"
 	"log"
 	"os"
