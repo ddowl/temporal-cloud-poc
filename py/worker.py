@@ -9,8 +9,10 @@ from workflow import DummyWorkflow
 
 namespace, cert_path, key_path = sys.argv[1:]
 
+interrupt_event = asyncio.Event()
 
-async def run_worker():
+
+async def main():
     print("Creating client to Temporal Cloud...")
     client = await create_temporal_client(namespace, cert_path, key_path)
 
@@ -21,7 +23,18 @@ async def run_worker():
         workflows=[DummyWorkflow],
         activities=[expensive_activity, unreliable_activity],
     )
-    await worker.run()
+    async with worker:
+        print("Worker started, ctrl+c to exit")
+        await interrupt_event.wait()
+        print("Shutting down worker")
 
 
-asyncio.run(run_worker())
+# Run async main w/ graceful keyboard interrupt shutdown
+
+if __name__ == "__main__":
+    loop = asyncio.new_event_loop()
+    try:
+        loop.run_until_complete(main())
+    except KeyboardInterrupt:
+        interrupt_event.set()
+        loop.run_until_complete(loop.shutdown_asyncgens())

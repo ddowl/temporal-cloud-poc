@@ -17,7 +17,7 @@ func main() {
 		// be encoded as required.
 		DataConverter: codec.NewEncryptionDataConverter(
 			converter.GetDefaultDataConverter(),
-			codec.DataConverterOptions{KeyID: "test", Compress: true},
+			codec.DataConverterOptions{KeyID: "test", Compress: false},
 		),
 	})
 	if err != nil {

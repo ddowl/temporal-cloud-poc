@@ -100,7 +100,10 @@ func main() {
 	// Only handle codecs for the default namespace in this example.
 	codecs := map[string][]converter.PayloadCodec{
 		"default": codec.NewEncryptionCodec(codec.DataConverterOptions{
-			KeyID: "test", Compress: true,
+			KeyID: "test", Compress: false,
+		}),
+		"alarm-dev.kx9n8": codec.NewEncryptionCodec(codec.DataConverterOptions{
+			KeyID: "drew-dev", Compress: false,
 		}),
 	}
 
