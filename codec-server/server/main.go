@@ -2,12 +2,15 @@ package main
 
 import (
 	"cloud-poc/codecserver/codec"
+	"encoding/hex"
 	"flag"
 	"fmt"
+
 	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 
 	"go.temporal.io/sdk/converter"
 	"go.temporal.io/server/common/log"
@@ -78,6 +81,8 @@ func newPayloadCodecNamespacesHTTPHandler(encoders map[string][]converter.Payloa
 }
 
 var portFlag int
+var namespaceFlag string
+var hexKey string
 var providerFlag string
 var audienceFlag string
 var webFlag string
@@ -88,6 +93,8 @@ func init() {
 	logger = log.NewCLILogger()
 
 	flag.IntVar(&portFlag, "port", 8081, "Port to listen on")
+	flag.StringVar(&namespaceFlag, "namespace", "default", "Namespace(s) (comma-separated)")
+	flag.StringVar(&hexKey, "key", "", "Hex repr of private symmetric key (UNSAFE!)")
 	flag.StringVar(&providerFlag, "provider", "", "OIDC Provider URL. Optional: Enforces oauth authentication")
 	flag.StringVar(&audienceFlag, "audience", "", "OIDC Audience. Optional")
 	flag.StringVar(&webFlag, "web", "", "Temporal Web URL. Optional: enables CORS which is required for access from Temporal Web")
@@ -96,16 +103,27 @@ func init() {
 func main() {
 	flag.Parse()
 
-	// Set codecs per namespace here.
-	// Only handle codecs for the default namespace in this example.
-	codecs := map[string][]converter.PayloadCodec{
-		"default": codec.NewEncryptionCodec(codec.DataConverterOptions{
-			KeyID: "test", Compress: false,
-		}),
-		"alarm-dev.kx9n8": codec.NewEncryptionCodec(codec.DataConverterOptions{
-			KeyID: "drew-dev", Compress: false,
-		}),
+	key, err := hex.DecodeString(hexKey)
+	if err != nil {
+		logger.Fatal("error decoding hex key", tag.NewErrorTag(err))
 	}
+
+	// Set codecs per namespace.
+	namespaces := strings.Split(namespaceFlag, ",")
+	codecs := make(map[string][]converter.PayloadCodec)
+	for _, namespace := range namespaces {
+		codecs[namespace] = codec.NewEncryptionCodec(codec.DataConverterOptions{
+			KeyID: "default-key-id", Key: key, Compress: false,
+		})
+	}
+	// codecs := map[string][]converter.PayloadCodec{
+	// 	"default": codec.NewEncryptionCodec(codec.DataConverterOptions{
+	// 		KeyID: "test", Compress: false,
+	// 	}),
+	// 	"alarm-dev.kx9n8": codec.NewEncryptionCodec(codec.DataConverterOptions{
+	// 		KeyID: "default-key-id", Compress: false,
+	// 	}),
+	// }
 
 	if providerFlag != "" {
 		p, err := newProvider(providerFlag)

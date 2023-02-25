@@ -7,14 +7,14 @@ from client import create_temporal_client
 from constants import TASK_QUEUE_NAME
 from workflow import DummyWorkflow
 
-namespace, cert_path, key_path = sys.argv[1:]
+namespace, cert_path, key_path, codec_key = sys.argv[1:]
 
 interrupt_event = asyncio.Event()
 
 
 async def main():
     print("Creating client to Temporal Cloud...")
-    client = await create_temporal_client(namespace, cert_path, key_path)
+    client = await create_temporal_client(namespace, cert_path, key_path, codec_key)
 
     print("Running worker...")
     worker = Worker(

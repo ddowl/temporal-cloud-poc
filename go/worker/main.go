@@ -9,8 +9,8 @@ import (
 )
 
 func main() {
-	namespace, certPath, keyPath := os.Args[1], os.Args[2], os.Args[3]
-	c, err := app.CreateTemporalCloudClient(namespace, certPath, keyPath)
+	namespace, certPath, certKeyPath, codecHexKey := os.Args[1], os.Args[2], os.Args[3], os.Args[4]
+	c, err := app.CreateTemporalCloudClient(namespace, certPath, certKeyPath, codecHexKey)
 	if err != nil {
 		log.Fatalln("unable to create temporal client", err)
 		return

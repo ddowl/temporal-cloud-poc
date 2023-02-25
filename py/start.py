@@ -5,11 +5,11 @@ from client import create_temporal_client
 from constants import TASK_QUEUE_NAME
 from workflow import DummyWorkflow, WorkflowParams
 
-namespace, cert_path, key_path = sys.argv[1:]
+namespace, cert_path, key_path, codec_key = sys.argv[1:]
 
 
 async def main():
-    client = await create_temporal_client(namespace, cert_path, key_path)
+    client = await create_temporal_client(namespace, cert_path, key_path, codec_key)
 
     params = WorkflowParams(A=7, B=10)
     print("Executing dummy workflow with params: ", params)

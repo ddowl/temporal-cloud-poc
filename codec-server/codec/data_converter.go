@@ -18,6 +18,7 @@ const (
 
 type DataConverterOptions struct {
 	KeyID string
+	Key   []byte
 	// Enable ZLib compression before encryption.
 	Compress bool
 }
@@ -25,12 +26,13 @@ type DataConverterOptions struct {
 // Codec implements PayloadCodec using AES Cr ypt.
 type Codec struct {
 	KeyID string
+	Key   []byte
 }
 
 func (e *Codec) getKey(keyID string) (key []byte) {
 	// Key must be fetched from secure storage in production (such as a KMS).
 	// For testing here we just hard code a key.
-	return []byte("test-key-test-key-test-key-test!")
+	return e.Key
 }
 
 func NewEncryptionDataConverter(dataConverter converter.DataConverter, options DataConverterOptions) converter.DataConverter {
@@ -39,7 +41,7 @@ func NewEncryptionDataConverter(dataConverter converter.DataConverter, options D
 
 func NewEncryptionCodec(options DataConverterOptions) []converter.PayloadCodec {
 	codecs := []converter.PayloadCodec{
-		&Codec{KeyID: options.KeyID},
+		&Codec{KeyID: options.KeyID, Key: options.Key},
 	}
 	// Enable compression if requested.
 	// Note that this must be done before encryption to provide any value. Encrypted data should by design not compress very well.

@@ -12,7 +12,7 @@ func Test_DataConverter(t *testing.T) {
 
 	cryptDc := NewEncryptionDataConverter(
 		converter.GetDefaultDataConverter(),
-		DataConverterOptions{KeyID: "test", Compress: true},
+		DataConverterOptions{KeyID: "test", Compress: false},
 	)
 
 	payload := "Testing"

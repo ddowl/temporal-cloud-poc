@@ -3,16 +3,22 @@ package app
 import (
 	"cloud-poc/codecserver/codec"
 	"crypto/tls"
+	"encoding/hex"
 	"fmt"
 
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/converter"
 )
 
-func CreateTemporalCloudClient(namespace string, certPath string, keyPath string) (client.Client, error) {
-	cert, err := tls.LoadX509KeyPair(certPath, keyPath)
+func CreateTemporalCloudClient(namespace string, certPath string, certKeyPath string, codecHexKey string) (client.Client, error) {
+	cert, err := tls.LoadX509KeyPair(certPath, certKeyPath)
 	if err != nil {
 		return nil, fmt.Errorf("error loading cert: %w", err)
+	}
+
+	codecKey, err := hex.DecodeString(codecHexKey)
+	if err != nil {
+		return nil, fmt.Errorf("error decoding hex key: %w", err)
 	}
 
 	temporalClient, err := client.Dial(client.Options{
@@ -23,7 +29,7 @@ func CreateTemporalCloudClient(namespace string, certPath string, keyPath string
 		},
 		DataConverter: codec.NewEncryptionDataConverter(
 			converter.GetDefaultDataConverter(),
-			codec.DataConverterOptions{KeyID: "test", Compress: false},
+			codec.DataConverterOptions{KeyID: "default-key-id", Key: codecKey, Compress: false},
 		),
 	})
 	if err != nil {
